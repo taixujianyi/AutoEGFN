@@ -9,7 +9,6 @@ def set_cvc(round):
         cvc_constr.append("y_0_{0}_0, y_1_{0}_0, y_2_{0}_0, y_3_{0}_0 : BITVECTOR(2);\n\n".format(r))
         cvc_constr.append("y_0_{0}_1, y_1_{0}_1, y_2_{0}_1, y_3_{0}_1 : BITVECTOR(2);\n\n".format(r))
 
-    cvc_constr.append("\n%%%%%%%%%%%%%%%%%%%%%%\n\n")
     for r in range(round):
         #Assign
         if r > 0:
@@ -18,7 +17,6 @@ def set_cvc(round):
             cvc_constr.append("ASSERT y_2_{0}_0 = x_2_{1}_0;\n".format(r, r-1))
             cvc_constr.append("ASSERT y_3_{0}_0 = x_3_{1}_0;\n".format(r, r-1))
         cvc_constr.append("\n")
-
 
         #Perm
         cvc_constr.append("ASSERT y_0_{0}_1 = y_3_{0}_0;\n".format(r))
@@ -30,7 +28,6 @@ def set_cvc(round):
         cvc_constr.append("ASSERT IF y_0_{0}_1=0bin00 THEN y_0_{0}_2=0bin00 ELSE y_0_{0}_2=0bin11 ENDIF;\n".format(r))
         cvc_constr.append("ASSERT IF y_2_{0}_1=0bin00 THEN y_2_{0}_2=0bin00 ELSE y_2_{0}_2=0bin11 ENDIF;\n".format(r))
         cvc_constr.append("\n")
-
 
         #XOR
         cvc_constr.append("ASSERT IF y_0_{0}_2=0bin00 THEN z_0_{0}_0=y_1_{0}_1 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
@@ -57,14 +54,12 @@ def set_cvc(round):
         cvc_constr.append("ASSERT IF y_2_{0}_2=0bin11 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
         cvc_constr.append("\n")
 
-
         #Perm
         cvc_constr.append("ASSERT x_0_{0}_0 = y_0_{0}_1;\n".format(r))
         cvc_constr.append("ASSERT x_1_{0}_0 = z_0_{0}_0;\n".format(r))
         cvc_constr.append("ASSERT x_2_{0}_0 = y_2_{0}_1;\n".format(r))
         cvc_constr.append("ASSERT x_3_{0}_0 = z_1_{0}_0;\n".format(r))
 
-    cvc_constr.append("%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n")
     cvc_constr.append("ASSERT y_0_{0}_1 & y_2_{0}_1 = 0bin00;\n".format(round-1))
     cvc_constr.append("\n")
 
