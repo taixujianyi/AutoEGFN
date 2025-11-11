@@ -1,368 +1,220 @@
 import os
+import time
 
-def set_cvc(round):
-    cvc_constr = []
-    for r in range(round):
-        cvc_constr.append("\nx_0_{0}_0, x_1_{0}_0, x_2_{0}_0, x_3_{0}_0, x_4_{0}_0, x_5_{0}_0, x_6_{0}_0, x_7_{0}_0, x_8_{0}_0, x_9_{0}_0, x_10_{0}_0, x_11_{0}_0, x_12_{0}_0, x_13_{0}_0, x_14_{0}_0, x_15_{0}_0 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("y_16_{0}_1, y_18_{0}_1, y_20_{0}_1, y_22_{0}_1, y_24_{0}_1, y_26_{0}_1, y_28_{0}_1, y_30_{0}_1 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("z_0_{0}_0, z_1_{0}_0, z_2_{0}_0, z_3_{0}_0, z_4_{0}_0, z_5_{0}_0, z_6_{0}_0, z_7_{0}_0 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("y_0_{0}_0, y_1_{0}_0, y_2_{0}_0, y_3_{0}_0, y_4_{0}_0, y_5_{0}_0, y_6_{0}_0, y_7_{0}_0, y_8_{0}_0, y_9_{0}_0, y_10_{0}_0, y_11_{0}_0, y_12_{0}_0, y_13_{0}_0, y_14_{0}_0, y_15_{0}_0 : BITVECTOR(2);\n\n".format(r))
+def set_smtlib2(rounds):
+    smtlib2_constr = []
+    smtlib2_constr.append("(set-logic QF_BV)\n\n")
 
-        cvc_constr.append("\nx_16_{0}_0, x_17_{0}_0, x_18_{0}_0, x_19_{0}_0, x_20_{0}_0, x_21_{0}_0, x_22_{0}_0, x_23_{0}_0, x_24_{0}_0, x_25_{0}_0, x_26_{0}_0, x_27_{0}_0, x_28_{0}_0, x_29_{0}_0, x_30_{0}_0, x_31_{0}_0 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("y_17_{0}_1, y_19_{0}_1, y_21_{0}_1, y_23_{0}_1, y_25_{0}_1, y_27_{0}_1, y_29_{0}_1, y_31_{0}_1 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("z_8_{0}_0, z_9_{0}_0, z_10_{0}_0, z_11_{0}_0, z_12_{0}_0, z_13_{0}_0, z_14_{0}_0, z_15_{0}_0 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("y_16_{0}_0, y_17_{0}_0, y_18_{0}_0, y_19_{0}_0, y_20_{0}_0, y_21_{0}_0, y_22_{0}_0, y_23_{0}_0, y_24_{0}_0, y_25_{0}_0, y_26_{0}_0, y_27_{0}_0, y_28_{0}_0, y_29_{0}_0, y_30_{0}_0, y_31_{0}_0 : BITVECTOR(2);\n\n".format(r))
+    # Variable declarations for all rounds
+    for r in range(rounds):
+        for i in range(16):
+            smtlib2_constr.append(f"(declare-fun x_{i}_{r}_0 () (_ BitVec 2))\n")
+        
+        for i in range(16, 32, 2):
+            smtlib2_constr.append(f"(declare-fun y_{i}_{r}_1 () (_ BitVec 2))\n")
+        
+        for i in range(8):
+            smtlib2_constr.append(f"(declare-fun z_{i}_{r}_0 () (_ BitVec 2))\n")
+        
+        for i in range(16):
+            smtlib2_constr.append(f"(declare-fun y_{i}_{r}_0 () (_ BitVec 2))\n")
+        
+        smtlib2_constr.append("\n")
 
-    for r in range(round):
-        #Assign
+        for i in range(16, 32):
+            smtlib2_constr.append(f"(declare-fun x_{i}_{r}_0 () (_ BitVec 2))\n")
+        
+        for i in range(17, 32, 2):
+            smtlib2_constr.append(f"(declare-fun y_{i}_{r}_1 () (_ BitVec 2))\n")
+        
+        for i in range(8, 16):
+            smtlib2_constr.append(f"(declare-fun z_{i}_{r}_0 () (_ BitVec 2))\n")
+        
+        for i in range(16, 32):
+            smtlib2_constr.append(f"(declare-fun y_{i}_{r}_0 () (_ BitVec 2))\n")
+        
+        smtlib2_constr.append("\n")
+
+    for r in range(rounds):
+        # Assign statements
         if r > 0:
-            cvc_constr.append("ASSERT y_0_{0}_0 = x_0_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_1_{0}_0 = x_1_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_2_{0}_0 = x_2_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_3_{0}_0 = x_3_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_4_{0}_0 = x_4_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_5_{0}_0 = x_5_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_6_{0}_0 = x_6_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_7_{0}_0 = x_7_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_8_{0}_0 = x_8_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_9_{0}_0 = x_9_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_10_{0}_0 = x_10_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_11_{0}_0 = x_11_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_12_{0}_0 = x_12_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_13_{0}_0 = x_13_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_14_{0}_0 = x_14_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_15_{0}_0 = x_15_{1}_0;\n".format(r, r-1))
+            for i in range(32):
+                smtlib2_constr.append(f"(assert (= y_{i}_{r}_0 x_{i}_{r-1}_0))\n")
+        smtlib2_constr.append("\n")
 
-            cvc_constr.append("ASSERT y_16_{0}_0 = x_16_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_17_{0}_0 = x_17_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_18_{0}_0 = x_18_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_19_{0}_0 = x_19_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_20_{0}_0 = x_20_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_21_{0}_0 = x_21_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_22_{0}_0 = x_22_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_23_{0}_0 = x_23_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_24_{0}_0 = x_24_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_25_{0}_0 = x_25_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_26_{0}_0 = x_26_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_27_{0}_0 = x_27_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_28_{0}_0 = x_28_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_29_{0}_0 = x_29_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_30_{0}_0 = x_30_{1}_0;\n".format(r, r-1))
-            cvc_constr.append("ASSERT y_31_{0}_0 = x_31_{1}_0;\n".format(r, r-1))
-        cvc_constr.append("\n")
+        # Pass through F
+        for i in range(16, 32, 2):
+            smtlib2_constr.append(f"(assert (= y_{i}_{r}_1 (ite (= y_{i}_{r}_0 #b00) #b00 #b11)))\n")        
+        for i in range(17, 32, 2):
+            smtlib2_constr.append(f"(assert (= y_{i}_{r}_1 (ite (= y_{i}_{r}_0 #b00) #b00 #b11)))\n")
+        smtlib2_constr.append("\n")
 
-        #pass thorough F
-        cvc_constr.append("ASSERT IF y_16_{0}_0=0bin00 THEN y_16_{0}_1=0bin00 ELSE y_16_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_0=0bin00 THEN y_18_{0}_1=0bin00 ELSE y_18_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_0=0bin00 THEN y_20_{0}_1=0bin00 ELSE y_20_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_0=0bin00 THEN y_22_{0}_1=0bin00 ELSE y_22_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_0=0bin00 THEN y_24_{0}_1=0bin00 ELSE y_24_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_0=0bin00 THEN y_26_{0}_1=0bin00 ELSE y_26_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_0=0bin00 THEN y_28_{0}_1=0bin00 ELSE y_28_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_0=0bin00 THEN y_30_{0}_1=0bin00 ELSE y_30_{0}_1=0bin11 ENDIF;\n".format(r))
+        # XOR operations
+        # z_0
+        smtlib2_constr.append(f"(assert (= z_0_{r}_0\n")
+        smtlib2_constr.append(f"    (ite (= y_16_{r}_1 #b00) y_15_{r}_0\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b01) (= y_15_{r}_0 #b00)) #b01\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b01) (= y_15_{r}_0 #b01)) #b01\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b01) (= y_15_{r}_0 #b10)) #b11\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b01) (= y_15_{r}_0 #b11)) #b11\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b10) (= y_15_{r}_0 #b00)) #b10\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b10) (= y_15_{r}_0 #b01)) #b11\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b10) (= y_15_{r}_0 #b10)) #b10\n")
+        smtlib2_constr.append(f"    (ite (and (= y_16_{r}_1 #b10) (= y_15_{r}_0 #b11)) #b11\n")
+        smtlib2_constr.append(f"    (ite (= y_16_{r}_1 #b11) #b11 #b00))))))))))))\n")
+        smtlib2_constr.append("\n")
 
-        cvc_constr.append("ASSERT IF y_17_{0}_0=0bin00 THEN y_17_{0}_1=0bin00 ELSE y_17_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_0=0bin00 THEN y_19_{0}_1=0bin00 ELSE y_19_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_0=0bin00 THEN y_21_{0}_1=0bin00 ELSE y_21_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_0=0bin00 THEN y_23_{0}_1=0bin00 ELSE y_23_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_0=0bin00 THEN y_25_{0}_1=0bin00 ELSE y_25_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_0=0bin00 THEN y_27_{0}_1=0bin00 ELSE y_27_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_0=0bin00 THEN y_29_{0}_1=0bin00 ELSE y_29_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_0=0bin00 THEN y_31_{0}_1=0bin00 ELSE y_31_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
+        # z_1
+        smtlib2_constr.append(f"(assert (= z_1_{r}_0\n")
+        smtlib2_constr.append(f"    (ite (= y_17_{r}_1 #b00) y_14_{r}_0\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b01) (= y_14_{r}_0 #b00)) #b01\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b01) (= y_14_{r}_0 #b01)) #b01\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b01) (= y_14_{r}_0 #b10)) #b11\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b01) (= y_14_{r}_0 #b11)) #b11\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b10) (= y_14_{r}_0 #b00)) #b10\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b10) (= y_14_{r}_0 #b01)) #b11\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b10) (= y_14_{r}_0 #b10)) #b10\n")
+        smtlib2_constr.append(f"    (ite (and (= y_17_{r}_1 #b10) (= y_14_{r}_0 #b11)) #b11\n")
+        smtlib2_constr.append(f"    (ite (= y_17_{r}_1 #b11) #b11 #b00))))))))))))\n")
+        smtlib2_constr.append("\n")
 
-        #XOR
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin00 THEN z_0_{0}_0=y_15_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin01 AND y_15_{0}_0=0bin00 THEN z_0_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin01 AND y_15_{0}_0=0bin01 THEN z_0_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin01 AND y_15_{0}_0=0bin10 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin01 AND y_15_{0}_0=0bin11 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin10 AND y_15_{0}_0=0bin00 THEN z_0_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin10 AND y_15_{0}_0=0bin01 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin10 AND y_15_{0}_0=0bin10 THEN z_0_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin10 AND y_15_{0}_0=0bin11 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_16_{0}_1=0bin11 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin00 THEN z_1_{0}_0=y_14_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin01 AND y_14_{0}_0=0bin00 THEN z_1_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin01 AND y_14_{0}_0=0bin01 THEN z_1_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin01 AND y_14_{0}_0=0bin10 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin01 AND y_14_{0}_0=0bin11 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin10 AND y_14_{0}_0=0bin00 THEN z_1_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin10 AND y_14_{0}_0=0bin01 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin10 AND y_14_{0}_0=0bin10 THEN z_1_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin10 AND y_14_{0}_0=0bin11 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_17_{0}_1=0bin11 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin00 THEN z_2_{0}_0=y_13_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin01 AND y_13_{0}_0=0bin00 THEN z_2_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin01 AND y_13_{0}_0=0bin01 THEN z_2_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin01 AND y_13_{0}_0=0bin10 THEN z_2_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin01 AND y_13_{0}_0=0bin11 THEN z_2_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin10 AND y_13_{0}_0=0bin00 THEN z_2_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin10 AND y_13_{0}_0=0bin01 THEN z_2_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin10 AND y_13_{0}_0=0bin10 THEN z_2_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin10 AND y_13_{0}_0=0bin11 THEN z_2_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_18_{0}_1=0bin11 THEN z_2_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin00 THEN z_3_{0}_0=y_12_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin01 AND y_12_{0}_0=0bin00 THEN z_3_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin01 AND y_12_{0}_0=0bin01 THEN z_3_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin01 AND y_12_{0}_0=0bin10 THEN z_3_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin01 AND y_12_{0}_0=0bin11 THEN z_3_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin10 AND y_12_{0}_0=0bin00 THEN z_3_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin10 AND y_12_{0}_0=0bin01 THEN z_3_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin10 AND y_12_{0}_0=0bin10 THEN z_3_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin10 AND y_12_{0}_0=0bin11 THEN z_3_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_19_{0}_1=0bin11 THEN z_3_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin00 THEN z_4_{0}_0=y_11_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin01 AND y_11_{0}_0=0bin00 THEN z_4_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin01 AND y_11_{0}_0=0bin01 THEN z_4_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin01 AND y_11_{0}_0=0bin10 THEN z_4_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin01 AND y_11_{0}_0=0bin11 THEN z_4_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin10 AND y_11_{0}_0=0bin00 THEN z_4_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin10 AND y_11_{0}_0=0bin01 THEN z_4_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin10 AND y_11_{0}_0=0bin10 THEN z_4_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin10 AND y_11_{0}_0=0bin11 THEN z_4_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_20_{0}_1=0bin11 THEN z_4_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin00 THEN z_5_{0}_0=y_10_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin01 AND y_10_{0}_0=0bin00 THEN z_5_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin01 AND y_10_{0}_0=0bin01 THEN z_5_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin01 AND y_10_{0}_0=0bin10 THEN z_5_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin01 AND y_10_{0}_0=0bin11 THEN z_5_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin10 AND y_10_{0}_0=0bin00 THEN z_5_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin10 AND y_10_{0}_0=0bin01 THEN z_5_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin10 AND y_10_{0}_0=0bin10 THEN z_5_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin10 AND y_10_{0}_0=0bin11 THEN z_5_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_21_{0}_1=0bin11 THEN z_5_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin00 THEN z_6_{0}_0=y_9_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin01 AND y_9_{0}_0=0bin00 THEN z_6_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin01 AND y_9_{0}_0=0bin01 THEN z_6_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin01 AND y_9_{0}_0=0bin10 THEN z_6_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin01 AND y_9_{0}_0=0bin11 THEN z_6_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin10 AND y_9_{0}_0=0bin00 THEN z_6_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin10 AND y_9_{0}_0=0bin01 THEN z_6_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin10 AND y_9_{0}_0=0bin10 THEN z_6_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin10 AND y_9_{0}_0=0bin11 THEN z_6_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_22_{0}_1=0bin11 THEN z_6_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin00 THEN z_7_{0}_0=y_8_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin01 AND y_8_{0}_0=0bin00 THEN z_7_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin01 AND y_8_{0}_0=0bin01 THEN z_7_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin01 AND y_8_{0}_0=0bin10 THEN z_7_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin01 AND y_8_{0}_0=0bin11 THEN z_7_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin10 AND y_8_{0}_0=0bin00 THEN z_7_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin10 AND y_8_{0}_0=0bin01 THEN z_7_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin10 AND y_8_{0}_0=0bin10 THEN z_7_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin10 AND y_8_{0}_0=0bin11 THEN z_7_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_23_{0}_1=0bin11 THEN z_7_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin00 THEN z_8_{0}_0=y_7_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin01 AND y_7_{0}_0=0bin00 THEN z_8_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin01 AND y_7_{0}_0=0bin01 THEN z_8_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin01 AND y_7_{0}_0=0bin10 THEN z_8_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin01 AND y_7_{0}_0=0bin11 THEN z_8_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin10 AND y_7_{0}_0=0bin00 THEN z_8_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin10 AND y_7_{0}_0=0bin01 THEN z_8_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin10 AND y_7_{0}_0=0bin10 THEN z_8_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin10 AND y_7_{0}_0=0bin11 THEN z_8_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_24_{0}_1=0bin11 THEN z_8_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin00 THEN z_9_{0}_0=y_6_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin01 AND y_6_{0}_0=0bin00 THEN z_9_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin01 AND y_6_{0}_0=0bin01 THEN z_9_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin01 AND y_6_{0}_0=0bin10 THEN z_9_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin01 AND y_6_{0}_0=0bin11 THEN z_9_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin10 AND y_6_{0}_0=0bin00 THEN z_9_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin10 AND y_6_{0}_0=0bin01 THEN z_9_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin10 AND y_6_{0}_0=0bin10 THEN z_9_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin10 AND y_6_{0}_0=0bin11 THEN z_9_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_25_{0}_1=0bin11 THEN z_9_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin00 THEN z_10_{0}_0=y_5_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin01 AND y_5_{0}_0=0bin00 THEN z_10_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin01 AND y_5_{0}_0=0bin01 THEN z_10_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin01 AND y_5_{0}_0=0bin10 THEN z_10_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin01 AND y_5_{0}_0=0bin11 THEN z_10_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin10 AND y_5_{0}_0=0bin00 THEN z_10_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin10 AND y_5_{0}_0=0bin01 THEN z_10_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin10 AND y_5_{0}_0=0bin10 THEN z_10_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin10 AND y_5_{0}_0=0bin11 THEN z_10_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_26_{0}_1=0bin11 THEN z_10_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin00 THEN z_11_{0}_0=y_4_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin01 AND y_4_{0}_0=0bin00 THEN z_11_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin01 AND y_4_{0}_0=0bin01 THEN z_11_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin01 AND y_4_{0}_0=0bin10 THEN z_11_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin01 AND y_4_{0}_0=0bin11 THEN z_11_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin10 AND y_4_{0}_0=0bin00 THEN z_11_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin10 AND y_4_{0}_0=0bin01 THEN z_11_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin10 AND y_4_{0}_0=0bin10 THEN z_11_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin10 AND y_4_{0}_0=0bin11 THEN z_11_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_27_{0}_1=0bin11 THEN z_11_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin00 THEN z_12_{0}_0=y_3_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin01 AND y_3_{0}_0=0bin00 THEN z_12_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin01 AND y_3_{0}_0=0bin01 THEN z_12_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin01 AND y_3_{0}_0=0bin10 THEN z_12_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin01 AND y_3_{0}_0=0bin11 THEN z_12_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin10 AND y_3_{0}_0=0bin00 THEN z_12_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin10 AND y_3_{0}_0=0bin01 THEN z_12_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin10 AND y_3_{0}_0=0bin10 THEN z_12_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin10 AND y_3_{0}_0=0bin11 THEN z_12_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_28_{0}_1=0bin11 THEN z_12_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin00 THEN z_13_{0}_0=y_2_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin01 AND y_2_{0}_0=0bin00 THEN z_13_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin01 AND y_2_{0}_0=0bin01 THEN z_13_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin01 AND y_2_{0}_0=0bin10 THEN z_13_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin01 AND y_2_{0}_0=0bin11 THEN z_13_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin10 AND y_2_{0}_0=0bin00 THEN z_13_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin10 AND y_2_{0}_0=0bin01 THEN z_13_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin10 AND y_2_{0}_0=0bin10 THEN z_13_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin10 AND y_2_{0}_0=0bin11 THEN z_13_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_29_{0}_1=0bin11 THEN z_13_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin00 THEN z_14_{0}_0=y_1_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin01 AND y_1_{0}_0=0bin00 THEN z_14_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin01 AND y_1_{0}_0=0bin01 THEN z_14_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin01 AND y_1_{0}_0=0bin10 THEN z_14_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin01 AND y_1_{0}_0=0bin11 THEN z_14_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin10 AND y_1_{0}_0=0bin00 THEN z_14_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin10 AND y_1_{0}_0=0bin01 THEN z_14_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin10 AND y_1_{0}_0=0bin10 THEN z_14_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin10 AND y_1_{0}_0=0bin11 THEN z_14_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_30_{0}_1=0bin11 THEN z_14_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin00 THEN z_15_{0}_0=y_0_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin01 AND y_0_{0}_0=0bin00 THEN z_15_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin01 AND y_0_{0}_0=0bin01 THEN z_15_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin01 AND y_0_{0}_0=0bin10 THEN z_15_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin01 AND y_0_{0}_0=0bin11 THEN z_15_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin10 AND y_0_{0}_0=0bin00 THEN z_15_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin10 AND y_0_{0}_0=0bin01 THEN z_15_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin10 AND y_0_{0}_0=0bin10 THEN z_15_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin10 AND y_0_{0}_0=0bin11 THEN z_15_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF y_31_{0}_1=0bin11 THEN z_15_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
+        z_mappings = [
+            (2, 18, 13), (3, 19, 12), (4, 20, 11), (5, 21, 10),
+            (6, 22, 9), (7, 23, 8)
+        ]
+        
+        for z_idx, y1_idx, y0_idx in z_mappings:
+            smtlib2_constr.append(f"(assert (= z_{z_idx}_{r}_0\n")
+            smtlib2_constr.append(f"    (ite (= y_{y1_idx}_{r}_1 #b00) y_{y0_idx}_{r}_0\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b00)) #b01\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b01)) #b01\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b10)) #b11\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b11)) #b11\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b00)) #b10\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b01)) #b11\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b10)) #b10\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b11)) #b11\n")
+            smtlib2_constr.append(f"    (ite (= y_{y1_idx}_{r}_1 #b11) #b11 #b00))))))))))))\n")
+            smtlib2_constr.append("\n")
 
-        #Perm
-        cvc_constr.append("ASSERT x_0_{0}_0 = y_31_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_1_{0}_0 = z_15_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_2_{0}_0 = z_14_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_3_{0}_0 = z_13_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_4_{0}_0 = z_12_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_5_{0}_0 = z_11_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_6_{0}_0 = z_10_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_7_{0}_0 = z_9_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_8_{0}_0 = z_8_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_9_{0}_0 = z_7_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_10_{0}_0 = z_6_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_11_{0}_0 = z_5_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_12_{0}_0 = z_4_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_13_{0}_0 = z_3_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_14_{0}_0 = z_2_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_15_{0}_0 = z_1_{0}_0;\n".format(r))
+        z_mappings_2 = [
+            (8, 24, 7), (9, 25, 6), (10, 26, 5), (11, 27, 4),
+            (12, 28, 3), (13, 29, 2), (14, 30, 1), (15, 31, 0)
+        ]
+        
+        for z_idx, y1_idx, y0_idx in z_mappings_2:
+            smtlib2_constr.append(f"(assert (= z_{z_idx}_{r}_0\n")
+            smtlib2_constr.append(f"    (ite (= y_{y1_idx}_{r}_1 #b00) y_{y0_idx}_{r}_0\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b00)) #b01\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b01)) #b01\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b10)) #b11\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y0_idx}_{r}_0 #b11)) #b11\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b00)) #b10\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b01)) #b11\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b10)) #b10\n")
+            smtlib2_constr.append(f"    (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y0_idx}_{r}_0 #b11)) #b11\n")
+            smtlib2_constr.append(f"    (ite (= y_{y1_idx}_{r}_1 #b11) #b11 #b00))))))))))))\n")
+            smtlib2_constr.append("\n")
 
-        cvc_constr.append("ASSERT x_16_{0}_0 = z_0_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_17_{0}_0 = y_16_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_18_{0}_0 = y_17_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_19_{0}_0 = y_18_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_20_{0}_0 = y_19_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_21_{0}_0 = y_20_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_22_{0}_0 = y_21_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_23_{0}_0 = y_22_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_24_{0}_0 = y_23_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_25_{0}_0 = y_24_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_26_{0}_0 = y_25_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_27_{0}_0 = y_26_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_28_{0}_0 = y_27_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_29_{0}_0 = y_28_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_30_{0}_0 = y_29_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT x_31_{0}_0 = y_30_{0}_0;\n".format(r))
+        # Permutation constraints
+        smtlib2_constr.append(f"(assert (= x_0_{r}_0 y_31_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_1_{r}_0 z_15_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_2_{r}_0 z_14_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_3_{r}_0 z_13_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_4_{r}_0 z_12_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_5_{r}_0 z_11_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_6_{r}_0 z_10_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_7_{r}_0 z_9_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_8_{r}_0 z_8_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_9_{r}_0 z_7_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_10_{r}_0 z_6_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_11_{r}_0 z_5_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_12_{r}_0 z_4_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_13_{r}_0 z_3_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_14_{r}_0 z_2_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_15_{r}_0 z_1_{r}_0))\n")
 
-    cvc_constr.append("ASSERT y_16_{0}_0 & y_17_{0}_0 & y_18_{0}_0 & y_19_{0}_0 & y_20_{0}_0 & y_21_{0}_0 & y_22_{0}_0 & y_23_{0}_0 & y_24_{0}_0 & y_25_{0}_0 & y_26_{0}_0 & y_27_{0}_0 & y_28_{0}_0 & y_29_{0}_0 & y_30_{0}_0 & y_31_{0}_0 = 0bin00;\n".format(round-1))
-    cvc_constr.append("\n")
+        smtlib2_constr.append(f"(assert (= x_16_{r}_0 z_0_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_17_{r}_0 y_16_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_18_{r}_0 y_17_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_19_{r}_0 y_18_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_20_{r}_0 y_19_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_21_{r}_0 y_20_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_22_{r}_0 y_21_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_23_{r}_0 y_22_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_24_{r}_0 y_23_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_25_{r}_0 y_24_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_26_{r}_0 y_25_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_27_{r}_0 y_26_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_28_{r}_0 y_27_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_29_{r}_0 y_28_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_30_{r}_0 y_29_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= x_31_{r}_0 y_30_{r}_0))\n")
+        smtlib2_constr.append("\n")
 
-    cvc_constr.append("ASSERT x_0_0_0@x_1_0_0@x_2_0_0@x_3_0_0@x_4_0_0@x_5_0_0@x_6_0_0@x_7_0_0@x_8_0_0@x_9_0_0@x_10_0_0@x_11_0_0@x_12_0_0@x_13_0_0@x_14_0_0@x_15_0_0@x_16_0_0@x_17_0_0@x_18_0_0@x_19_0_0@x_20_0_0@x_21_0_0@x_22_0_0@x_23_0_0@x_24_0_0@x_25_0_0@x_26_0_0@x_27_0_0@x_28_0_0@x_29_0_0@x_30_0_0@x_31_0_0 /= 0bin0000000000000000000000000000000000000000000000000000000000000000;\n")
-    cvc_constr.append("ASSERT x_0_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_1_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_2_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_3_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_4_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_5_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_6_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_7_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_8_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_9_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_10_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_11_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_12_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_13_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_14_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_15_0_0 /= 0bin11;\n")
+    # Active constraints
+    for i in range(16):
+        smtlib2_constr.append(f"(declare-fun active_{i+1} () (_ BitVec 1))\n")
     
-    cvc_constr.append("ASSERT x_16_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_17_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_18_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_19_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_20_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_21_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_22_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_23_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_24_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_25_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_26_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_27_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_28_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_29_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_30_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_31_0_0 /= 0bin11;\n")
-    cvc_constr.append("\n")
+    active_indices = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+    for i, idx in enumerate(active_indices):
+        smtlib2_constr.append(f"(assert (= active_{i+1} (ite (= y_{idx}_{rounds-1}_0 #b00) #b0 #b1)))\n")
+    and_expr = "active_1"
+    for i in range(2, 17):
+        and_expr = f"(bvand {and_expr} active_{i})"
+    smtlib2_constr.append(f"(assert (= {and_expr} #b0))\n\n")
 
-    cvc_constr.append("QUERY FALSE;\nCOUNTEREXAMPLE;\n")
 
-    return cvc_constr
 
-def run(target, round):
-    cvc = set_cvc(round)
+    x_bits = [f"x_{i}_0_0" for i in range(32)]
+    
+    concat_expr = x_bits[0]
+    for bit in x_bits[1:]:
+        concat_expr = f"(concat {concat_expr} {bit})"
+    
+    smtlib2_constr.append(f"(assert (not (= {concat_expr} #b{'0'*64})))\n")
 
-    filename = target + "-round{0}.cvc".format(round)
+
+    for i in range(32):
+        smtlib2_constr.append(f"(assert (not (= x_{i}_0_0 #b11)))\n")
+
+    smtlib2_constr.append("\n(check-sat)\n(get-model)\n")
+    return smtlib2_constr
+
+def run_stp(target, rounds):
+    smtlib2_code = set_smtlib2(rounds)
+    filename = f"{target}-round{rounds}.smt2"
     with open(filename, "w") as f:
-        for item in cvc:
-            f.write(item)
-        f.close()
-    command = 'stp ' + filename
+        f.writelines(smtlib2_code)
+
+    command = f"stp {filename}"
     output = os.popen(command)
     return output
 
-def remove_file(target, round):
-    for i in range(1, round + 1):
-        filename = target + "-round{0}.cvc".format(i)
-        command_remove = './' + filename
-        os.remove(command_remove)
-
+def remove_file(target, rounds):
+    for i in range(1, rounds + 1):
+        filename = f"{target}-round{i}.smt2"
+        if os.path.exists(filename):
+            os.remove(filename)
 
 if __name__ == '__main__':
-
+    start = time.time()
     target = "nyb-d32-r1"
+    rounds = 1
+    print("round =", rounds)
+    result = run_stp(target, rounds)
+    result_str = result.read()
+    print("result =", result_str)
 
-    round = 1
-    print("round = ", round)
-    result = run(target, round)
-    result1 = result.read()
-    print("result1 = ", result1)
-
-    while result1.find('Invalid.') >= 0:
-        round = round + 1
-        print("round = ", round)
-        result = run(target, round)
-        result1 = result.read()
-        print("result1 = ", result1)
+    while "unsat" not in result_str:
+        rounds += 1
+        print("round =", rounds)
+        result = run_stp(target, rounds)
+        result_str = result.read()
+        print("result =", result_str)
     else:
-        print("max-r1 = ", round - 1)
+        print("max-r1 =", rounds - 1)
 
-    remove_file(target, round)
+    end = time.time()
+    print("time: {:.2f} s".format(end - start))
+    remove_file(target, rounds)

@@ -1,111 +1,123 @@
 import os
+import time
 
-def set_cvc(round):
-    cvc_constr = []
-    for r in range(round):
-        cvc_constr.append("\nx_0_{0}_0, x_1_{0}_0, x_2_{0}_0, x_3_{0}_0 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("x_0_{0}_1, x_2_{0}_1 : BITVECTOR(2);\n".format(r))
-        cvc_constr.append("z_0_{0}_0, z_1_{0}_0: BITVECTOR(2);\n".format(r))
-        cvc_constr.append("y_0_{0}, y_1_{0}, y_2_{0}, y_3_{0} : BITVECTOR(2);\n\n".format(r))
+def set_smtlib2(rounds):
+    smtlib2_constr = []
+    smtlib2_constr.append("(set-logic QF_BV)\n\n")
 
-    for r in range(round):
-        #Assign
+    # declare variables
+    for r in range(rounds):
+        smtlib2_constr.append(f"(declare-fun x_0_{r}_0 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun x_1_{r}_0 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun x_2_{r}_0 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun x_3_{r}_0 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun x_0_{r}_1 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun x_2_{r}_1 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun z_0_{r}_0 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun z_1_{r}_0 () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun y_0_{r} () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun y_1_{r} () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun y_2_{r} () (_ BitVec 2))\n")
+        smtlib2_constr.append(f"(declare-fun y_3_{r} () (_ BitVec 2))\n\n")
+
+    for r in range(rounds):
+        # Assign
         if r > 0:
-            cvc_constr.append("ASSERT x_0_{0}_0 = y_0_{1};\n".format(r, r-1))
-            cvc_constr.append("ASSERT x_1_{0}_0 = y_1_{1};\n".format(r, r-1))
-            cvc_constr.append("ASSERT x_2_{0}_0 = y_2_{1};\n".format(r, r-1))
-            cvc_constr.append("ASSERT x_3_{0}_0 = y_3_{1};\n".format(r, r-1))
-        cvc_constr.append("\n")
+            smtlib2_constr.append(f"(assert (= x_0_{r}_0 y_0_{r-1}))\n")
+            smtlib2_constr.append(f"(assert (= x_1_{r}_0 y_1_{r-1}))\n")
+            smtlib2_constr.append(f"(assert (= x_2_{r}_0 y_2_{r-1}))\n")
+            smtlib2_constr.append(f"(assert (= x_3_{r}_0 y_3_{r-1}))\n")
+        smtlib2_constr.append("\n")
 
-        #pass thorough F
-        cvc_constr.append("ASSERT IF x_0_{0}_0=0bin00 THEN x_0_{0}_1=0bin00 ELSE x_0_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_0=0bin00 THEN x_2_{0}_1=0bin00 ELSE x_2_{0}_1=0bin11 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
+        # F function
+        smtlib2_constr.append(f"(assert (= x_0_{r}_1 (ite (= x_0_{r}_0 #b00) #b00 #b11)))\n")
+        smtlib2_constr.append(f"(assert (= x_2_{r}_1 (ite (= x_2_{r}_0 #b00) #b00 #b11)))\n")
+        smtlib2_constr.append("\n")
 
-        #XOR
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin00 THEN z_0_{0}_0=x_1_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin01 AND x_1_{0}_0=0bin00 THEN z_0_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin01 AND x_1_{0}_0=0bin01 THEN z_0_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin01 AND x_1_{0}_0=0bin10 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin01 AND x_1_{0}_0=0bin11 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin10 AND x_1_{0}_0=0bin00 THEN z_0_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin10 AND x_1_{0}_0=0bin01 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin10 AND x_1_{0}_0=0bin10 THEN z_0_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin10 AND x_1_{0}_0=0bin11 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_0_{0}_1=0bin11 THEN z_0_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
+        # XOR
+        smtlib2_constr.append(
+            f"(assert (= z_0_{r}_0\n"
+            f"    (ite (= x_0_{r}_1 #b00) x_1_{r}_0\n"
+            f"         (ite (and (= x_0_{r}_1 #b01) (= x_1_{r}_0 #b00)) #b01\n"
+            f"         (ite (and (= x_0_{r}_1 #b01) (= x_1_{r}_0 #b01)) #b01\n"
+            f"         (ite (and (= x_0_{r}_1 #b01) (= x_1_{r}_0 #b10)) #b11\n"
+            f"         (ite (and (= x_0_{r}_1 #b01) (= x_1_{r}_0 #b11)) #b11\n"
+            f"         (ite (and (= x_0_{r}_1 #b10) (= x_1_{r}_0 #b00)) #b10\n"
+            f"         (ite (and (= x_0_{r}_1 #b10) (= x_1_{r}_0 #b01)) #b11\n"
+            f"         (ite (and (= x_0_{r}_1 #b10) (= x_1_{r}_0 #b10)) #b10\n"
+            f"         (ite (and (= x_0_{r}_1 #b10) (= x_1_{r}_0 #b11)) #b11\n"
+            f"         (ite (= x_0_{r}_1 #b11) #b11 #b00))))))))))))\n"
+        )
+        smtlib2_constr.append("\n")
 
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin00 THEN z_1_{0}_0=x_3_{0}_0 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin01 AND x_3_{0}_0=0bin00 THEN z_1_{0}_0=0bin01 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin01 AND x_3_{0}_0=0bin01 THEN z_1_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin01 AND x_3_{0}_0=0bin10 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin01 AND x_3_{0}_0=0bin11 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin10 AND x_3_{0}_0=0bin00 THEN z_1_{0}_0=0bin10 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin10 AND x_3_{0}_0=0bin01 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin10 AND x_3_{0}_0=0bin10 THEN z_1_{0}_0=0bin00 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin10 AND x_3_{0}_0=0bin11 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("ASSERT IF x_2_{0}_1=0bin11 THEN z_1_{0}_0=0bin11 ELSE 0bin1 = 0bin1 ENDIF;\n".format(r))
-        cvc_constr.append("\n")
+        smtlib2_constr.append(
+            f"(assert (= z_1_{r}_0\n"
+            f"    (ite (= x_2_{r}_1 #b00) x_3_{r}_0\n"
+            f"         (ite (and (= x_2_{r}_1 #b01) (= x_3_{r}_0 #b00)) #b01\n"
+            f"         (ite (and (= x_2_{r}_1 #b01) (= x_3_{r}_0 #b01)) #b01\n"
+            f"         (ite (and (= x_2_{r}_1 #b01) (= x_3_{r}_0 #b10)) #b11\n"
+            f"         (ite (and (= x_2_{r}_1 #b01) (= x_3_{r}_0 #b11)) #b11\n"
+            f"         (ite (and (= x_2_{r}_1 #b10) (= x_3_{r}_0 #b00)) #b10\n"
+            f"         (ite (and (= x_2_{r}_1 #b10) (= x_3_{r}_0 #b01)) #b11\n"
+            f"         (ite (and (= x_2_{r}_1 #b10) (= x_3_{r}_0 #b10)) #b10\n"
+            f"         (ite (and (= x_2_{r}_1 #b10) (= x_3_{r}_0 #b11)) #b11\n"
+            f"         (ite (= x_2_{r}_1 #b11) #b11 #b00))))))))))))\n"
+        )
+        smtlib2_constr.append("\n")
 
-        #Perm
-        cvc_constr.append("ASSERT y_0_{0} = z_0_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT y_1_{0} = x_2_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT y_2_{0} = z_1_{0}_0;\n".format(r))
-        cvc_constr.append("ASSERT y_3_{0} = x_0_{0}_0;\n".format(r))
+        # Permutation
+        smtlib2_constr.append(f"(assert (= y_0_{r} z_0_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= y_1_{r} x_2_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= y_2_{r} z_1_{r}_0))\n")
+        smtlib2_constr.append(f"(assert (= y_3_{r} x_0_{r}_0))\n\n")
 
-    cvc_constr.append("ASSERT x_0_{0}_0 & x_2_{0}_0 = 0bin00;\n".format(round-1))
-    cvc_constr.append("\n")
+    smtlib2_constr.append(f"(assert (= (bvand x_0_{rounds-1}_0 x_2_{rounds-1}_0) #b00))\n\n")
 
-    cvc_constr.append("ASSERT x_0_0_0@x_1_0_0@x_2_0_0@x_3_0_0 /= 0bin00000000;\n")
-    cvc_constr.append("ASSERT x_0_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_1_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_2_0_0 /= 0bin11;\n")
-    cvc_constr.append("ASSERT x_3_0_0 /= 0bin11;\n")     
-    cvc_constr.append("\n")
+    smtlib2_constr.append(
+        "(assert (not (= (concat x_0_0_0 (concat x_1_0_0 (concat x_2_0_0 x_3_0_0))) #b00000000)))\n"
+    )
+    
+    for i in range(4):
+        smtlib2_constr.append(f"(assert (not (= x_{i}_0_0 #b11)))\n")
+    smtlib2_constr.append("\n")
 
-    cvc_constr.append("QUERY FALSE;\nCOUNTEREXAMPLE;\n")
+    smtlib2_constr.append("(check-sat)\n(get-model)\n")
+    return smtlib2_constr
 
-    return cvc_constr
-
-def run(target, round):
-    cvc = set_cvc(round)
-
-    filename = target + "-round{0}.cvc".format(round)
+def run_stp(target, rounds):
+    smtlib2_code = set_smtlib2(rounds)
+    filename = f"{target}-round{rounds}.smt2"
     with open(filename, "w") as f:
-        for item in cvc:
-            f.write(item)
-        f.close()
-    command = 'stp ' + filename
+        f.writelines(smtlib2_code)
+
+    command = f"stp {filename}"
     output = os.popen(command)
     return output
 
-def remove_file(target, round):
-    for i in range(1, round + 1):
-        filename = target + "-round{0}.cvc".format(i)
-        command_remove = './' + filename
-        os.remove(command_remove)
-
+def remove_file(target, rounds):
+    for i in range(1, rounds + 1):
+        filename = f"{target}-round{i}.smt2"
+        if os.path.exists(filename):
+            os.remove(filename)
 
 if __name__ == '__main__':
-
+    start = time.time()
     target = "type2-d4-r1"
+    rounds = 1
+    print("round =", rounds)
+    result = run_stp(target, rounds)
+    result_str = result.read()
+    print("result =", result_str)
 
-    round = 1
-    print("round = ", round)
-    result = run(target, round)
-    result1 = result.read()
-    print("result1 = ", result1)
-
-    while result1.find('Invalid.') >= 0:
-        round = round + 1
-        print("round = ", round)
-        result = run(target, round)
-        result1 = result.read()
-        print("result1 = ", result1)
+    while "unsat" not in result_str:
+        rounds += 1
+        print("round =", rounds)
+        result = run_stp(target, rounds)
+        result_str = result.read()
+        print("result =", result_str)
     else:
-        print("max-r1 = ", round - 1)
+        print("max-r1 =", rounds - 1)
 
-    remove_file(target, round)
-
-
-
+    end = time.time()
+    print("time: {:.2f} s".format(end - start))
+    remove_file(target, rounds)
