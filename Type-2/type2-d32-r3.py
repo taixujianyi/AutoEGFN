@@ -7,7 +7,6 @@ def set_smtlib2(rounds):
 
     # Variable declarations
     for r in range(rounds):
-        # First 16 x variables (0-15)
         for i in range(16):
             smtlib2_constr.append(f"(declare-fun x_{i}_{r}_0 () (_ BitVec 2))\n")
         
@@ -31,9 +30,33 @@ def set_smtlib2(rounds):
         
         for i in range(16, 32):
             smtlib2_constr.append(f"(declare-fun y_{i}_{r}_0 () (_ BitVec 2))\n")
-        
         smtlib2_constr.append("\n")
 
+    smtlib2_constr.append(f"(define-fun Table ((key (_ BitVec 6))) (_ BitVec 1)\n")
+    smtlib2_constr.append(f"    (ite (or\n")
+    smtlib2_constr.append(f"        (= key #b000000)\n")
+    smtlib2_constr.append(f"        (= key #b000101)\n")
+    smtlib2_constr.append(f"        (= key #b001010)\n")
+    smtlib2_constr.append(f"        (= key #b001111)\n")
+
+    smtlib2_constr.append(f"        (= key #b010001)\n")
+    smtlib2_constr.append(f"        (= key #b010100)\n")
+    smtlib2_constr.append(f"        (= key #b010101)\n")
+    smtlib2_constr.append(f"        (= key #b011011)\n")
+    smtlib2_constr.append(f"        (= key #b011111)\n")
+
+    smtlib2_constr.append(f"        (= key #b100010)\n")
+    smtlib2_constr.append(f"        (= key #b100111)\n")
+    smtlib2_constr.append(f"        (= key #b101000)\n")
+    smtlib2_constr.append(f"        (= key #b101010)\n")
+    smtlib2_constr.append(f"        (= key #b101111)\n")
+
+    smtlib2_constr.append(f"        (= key #b110011)\n")
+    smtlib2_constr.append(f"        (= key #b110111)\n")
+    smtlib2_constr.append(f"        (= key #b111011)\n")
+    smtlib2_constr.append(f"        (= key #b111111)\n")
+    smtlib2_constr.append(f"    ) #b1 #b0))\n")
+    
     for r in range(rounds):
         # Assign statements
         if r > 0:
@@ -51,71 +74,21 @@ def set_smtlib2(rounds):
             smtlib2_constr.append(f"(assert (= y_{i}_{r}_1 (ite (= y_{i}_{r}_0 #b00) #b00 #b11)))\n")
         smtlib2_constr.append("\n")
 
-        # XOR
-        smtlib2_constr.append(
-            f"(assert (= z_0_{r}_0\n"
-            f"    (ite (= y_31_{r}_1 #b00) y_0_{r}_0\n"
-            f"         (ite (and (= y_31_{r}_1 #b01) (= y_0_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= y_31_{r}_1 #b01) (= y_0_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= y_31_{r}_1 #b01) (= y_0_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= y_31_{r}_1 #b01) (= y_0_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= y_31_{r}_1 #b10) (= y_0_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= y_31_{r}_1 #b10) (= y_0_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= y_31_{r}_1 #b10) (= y_0_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= y_31_{r}_1 #b10) (= y_0_{r}_0 #b11)) #b11\n"
-            f"         (ite (= y_31_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        smtlib2_constr.append("\n")
 
+        # XOR
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat y_31_{r}_1 y_0_{r}_0) z_0_{r}_0)) #b1))\n")
         for i in range(1, 8):
             y1_idx = 2*i - 1  # 1, 3, 5, 7, 9, 11, 13
             y2_idx = 2*i      # 2, 4, 6, 8, 10, 12, 14
-            smtlib2_constr.append(
-                f"(assert (= z_{i}_{r}_0\n"
-                f"    (ite (= y_{y1_idx}_{r}_1 #b00) y_{y2_idx}_{r}_0\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b00)) #b01\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b01)) #b01\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b10)) #b11\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b11)) #b11\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b00)) #b10\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b01)) #b11\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b10)) #b10\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b11)) #b11\n"
-                f"         (ite (= y_{y1_idx}_{r}_1 #b11) #b11 #b00))))))))))))\n"
-            )
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat y_{y1_idx}_{r}_1 y_{y2_idx}_{r}_0) z_{i}_{r}_0)) #b1))\n")
             smtlib2_constr.append("\n")
 
-        smtlib2_constr.append(
-            f"(assert (= z_8_{r}_0\n"
-            f"    (ite (= y_15_{r}_1 #b00) y_16_{r}_0\n"
-            f"         (ite (and (= y_15_{r}_1 #b01) (= y_16_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= y_15_{r}_1 #b01) (= y_16_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= y_15_{r}_1 #b01) (= y_16_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= y_15_{r}_1 #b01) (= y_16_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= y_15_{r}_1 #b10) (= y_16_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= y_15_{r}_1 #b10) (= y_16_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= y_15_{r}_1 #b10) (= y_16_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= y_15_{r}_1 #b10) (= y_16_{r}_0 #b11)) #b11\n"
-            f"         (ite (= y_15_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        smtlib2_constr.append("\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat y_15_{r}_1 y_16_{r}_0) z_8_{r}_0)) #b1))\n")
 
         for i in range(9, 16):
             y1_idx = 2*i - 1  # 17, 19, 21, 23, 25, 27, 29
             y2_idx = 2*i      # 18, 20, 22, 24, 26, 28, 30
-            smtlib2_constr.append(
-                f"(assert (= z_{i}_{r}_0\n"
-                f"    (ite (= y_{y1_idx}_{r}_1 #b00) y_{y2_idx}_{r}_0\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b00)) #b01\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b01)) #b01\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b10)) #b11\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b01) (= y_{y2_idx}_{r}_0 #b11)) #b11\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b00)) #b10\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b01)) #b11\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b10)) #b10\n"
-                f"         (ite (and (= y_{y1_idx}_{r}_1 #b10) (= y_{y2_idx}_{r}_0 #b11)) #b11\n"
-                f"         (ite (= y_{y1_idx}_{r}_1 #b11) #b11 #b00))))))))))))\n"
-            )
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat y_{y1_idx}_{r}_1 y_{y2_idx}_{r}_0) z_{i}_{r}_0)) #b1))\n")
             smtlib2_constr.append("\n")
 
         # Permutation

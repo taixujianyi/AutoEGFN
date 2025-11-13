@@ -5,7 +5,6 @@ def set_smtlib2(rounds):
     smtlib2_constr = []
     smtlib2_constr.append("(set-logic QF_BV)\n\n")
 
-    # Variable declarations
     for r in range(rounds):
         for i in range(16):
             smtlib2_constr.append(f"(declare-fun x_{i}_{r}_0 () (_ BitVec 2))\n")
@@ -33,6 +32,31 @@ def set_smtlib2(rounds):
         
         smtlib2_constr.append("\n")
 
+    smtlib2_constr.append(f"(define-fun Table ((key (_ BitVec 6))) (_ BitVec 1)\n")
+    smtlib2_constr.append(f"    (ite (or\n")
+    smtlib2_constr.append(f"        (= key #b000000)\n")
+    smtlib2_constr.append(f"        (= key #b000101)\n")
+    smtlib2_constr.append(f"        (= key #b001010)\n")
+    smtlib2_constr.append(f"        (= key #b001111)\n")
+
+    smtlib2_constr.append(f"        (= key #b010001)\n")
+    smtlib2_constr.append(f"        (= key #b010100)\n")
+    smtlib2_constr.append(f"        (= key #b010101)\n")
+    smtlib2_constr.append(f"        (= key #b011011)\n")
+    smtlib2_constr.append(f"        (= key #b011111)\n")
+
+    smtlib2_constr.append(f"        (= key #b100010)\n")
+    smtlib2_constr.append(f"        (= key #b100111)\n")
+    smtlib2_constr.append(f"        (= key #b101000)\n")
+    smtlib2_constr.append(f"        (= key #b101010)\n")
+    smtlib2_constr.append(f"        (= key #b101111)\n")
+
+    smtlib2_constr.append(f"        (= key #b110011)\n")
+    smtlib2_constr.append(f"        (= key #b110111)\n")
+    smtlib2_constr.append(f"        (= key #b111011)\n")
+    smtlib2_constr.append(f"        (= key #b111111)\n")
+    smtlib2_constr.append(f"    ) #b1 #b0))\n")
+    
     for r in range(rounds):
         # Assign statements
         if r > 0:
@@ -49,42 +73,19 @@ def set_smtlib2(rounds):
             smtlib2_constr.append(f"(assert (= x_{i}_{r}_1 (ite (= x_{i}_{r}_0 #b00) #b00 #b11)))\n")
         smtlib2_constr.append("\n")
 
+
         # XOR operations for z_0 to z_7
         for i in range(0, 16, 2):
             z_index = i // 2
             x1_index = i + 1
-            smtlib2_constr.append(
-                f"(assert (= z_{z_index}_{r}_0\n"
-                f"    (ite (= x_{i}_{r}_1 #b00) x_{x1_index}_{r}_0\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b00)) #b01\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b01)) #b01\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b10)) #b11\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b11)) #b11\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b00)) #b10\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b01)) #b11\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b10)) #b10\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b11)) #b11\n"
-                f"         (ite (= x_{i}_{r}_1 #b11) #b11 #b00))))))))))))\n"
-            )
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat x_{i}_{r}_1 x_{x1_index}_{r}_0) z_{z_index}_{r}_0)) #b1))\n")
             smtlib2_constr.append("\n")
 
         # XOR operations for z_8 to z_15
         for i in range(16, 32, 2):
             z_index = (i // 2)
             x1_index = i + 1
-            smtlib2_constr.append(
-                f"(assert (= z_{z_index}_{r}_0\n"
-                f"    (ite (= x_{i}_{r}_1 #b00) x_{x1_index}_{r}_0\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b00)) #b01\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b01)) #b01\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b10)) #b11\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b01) (= x_{x1_index}_{r}_0 #b11)) #b11\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b00)) #b10\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b01)) #b11\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b10)) #b10\n"
-                f"         (ite (and (= x_{i}_{r}_1 #b10) (= x_{x1_index}_{r}_0 #b11)) #b11\n"
-                f"         (ite (= x_{i}_{r}_1 #b11) #b11 #b00))))))))))))\n"
-            )
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat x_{i}_{r}_1 x_{x1_index}_{r}_0) z_{z_index}_{r}_0)) #b1))\n")
             smtlib2_constr.append("\n")
 
         # Permutation

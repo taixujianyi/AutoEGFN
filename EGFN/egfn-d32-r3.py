@@ -28,6 +28,31 @@ def set_smtlib2(rounds):
         
         smtlib2_constr.append("\n")
 
+    smtlib2_constr.append(f"(define-fun Table ((key (_ BitVec 6))) (_ BitVec 1)\n")
+    smtlib2_constr.append(f"    (ite (or\n")
+    smtlib2_constr.append(f"        (= key #b000000)\n")
+    smtlib2_constr.append(f"        (= key #b000101)\n")
+    smtlib2_constr.append(f"        (= key #b001010)\n")
+    smtlib2_constr.append(f"        (= key #b001111)\n")
+
+    smtlib2_constr.append(f"        (= key #b010001)\n")
+    smtlib2_constr.append(f"        (= key #b010100)\n")
+    smtlib2_constr.append(f"        (= key #b010101)\n")
+    smtlib2_constr.append(f"        (= key #b011011)\n")
+    smtlib2_constr.append(f"        (= key #b011111)\n")
+
+    smtlib2_constr.append(f"        (= key #b100010)\n")
+    smtlib2_constr.append(f"        (= key #b100111)\n")
+    smtlib2_constr.append(f"        (= key #b101000)\n")
+    smtlib2_constr.append(f"        (= key #b101010)\n")
+    smtlib2_constr.append(f"        (= key #b101111)\n")
+
+    smtlib2_constr.append(f"        (= key #b110011)\n")
+    smtlib2_constr.append(f"        (= key #b110111)\n")
+    smtlib2_constr.append(f"        (= key #b111011)\n")
+    smtlib2_constr.append(f"        (= key #b111111)\n")
+    smtlib2_constr.append(f"    ) #b1 #b0))\n")
+
     for r in range(rounds):
         if r > 0:
             for i in range(32):
@@ -47,42 +72,27 @@ def set_smtlib2(rounds):
             smtlib2_constr.append(f"(assert (= y_{i}_{r}_2 (ite (= y_{i}_{r}_1 #b00) #b00 #b11)))\n")
         smtlib2_constr.append("\n")
 
-        # XOR operation
-        def create_xor_assertion(result_var, input1_var, input2_var):
-            return (
-                f"(assert (= {result_var}\n"
-                f"    (ite (= {input1_var} #b00) {input2_var}\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b00)) #b01\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b01)) #b01\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b10)) #b11\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b11)) #b11\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b00)) #b10\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b01)) #b11\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b10)) #b10\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b11)) #b11\n"
-                f"         (ite (= {input1_var} #b11) #b11 #b00))))))))))))\n"
-            )
-
+        # XOR
         for i in range(17, 32):
-            smtlib2_constr.append(create_xor_assertion(f"z_{i}_{r}_0", f"y_15_{r}_1", f"y_{i}_{r}_1"))
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat y_15_{r}_1 y_{i}_{r}_1) z_{i}_{r}_0)) #b1))\n")
             smtlib2_constr.append("\n")
 
-        smtlib2_constr.append(create_xor_assertion(f"z_31_{r}_1", f"y_14_{r}_1", f"z_31_{r}_0"))
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat y_14_{r}_1 z_31_{r}_0) z_31_{r}_1)) #b1))\n")
         smtlib2_constr.append("\n")
         
         for i, control_idx in enumerate(range(13, -1, -1)):
-            smtlib2_constr.append(create_xor_assertion(f"z_31_{r}_{i+2}", f"y_{control_idx}_{r}_1", f"z_31_{r}_{i+1}"))
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat y_{control_idx}_{r}_1 z_31_{r}_{i+1}) z_31_{r}_{i+2})) #b1))\n")
             smtlib2_constr.append("\n")
 
-        smtlib2_constr.append(create_xor_assertion(f"z_31_{r}_15", f"y_0_{r}_2", f"z_31_{r}_14"))
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat y_0_{r}_2 z_31_{r}_14) z_31_{r}_15)) #b1))\n")
         smtlib2_constr.append("\n")
         
         for i in range(30, 16, -1):
-            control_idx = 31 - i  # y_1_2 controls z_30_1, y_2_2 controls z_29_1, etc.
-            smtlib2_constr.append(create_xor_assertion(f"z_{i}_{r}_1", f"y_{control_idx}_{r}_2", f"z_{i}_{r}_0"))
+            control_idx = 31 - i
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat y_{control_idx}_{r}_2 z_{i}_{r}_0) z_{i}_{r}_1)) #b1))\n")
             smtlib2_constr.append("\n")
 
-        smtlib2_constr.append(create_xor_assertion(f"z_16_{r}_0", f"y_15_{r}_2", f"y_16_{r}_1"))
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat y_15_{r}_2 y_16_{r}_1) z_16_{r}_0)) #b1))\n")
         smtlib2_constr.append("\n")
 
         for i in range(16):

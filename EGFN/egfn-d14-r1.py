@@ -27,6 +27,31 @@ def set_smtlib2(rounds):
         
         smtlib2_constr.append("\n")
 
+    smtlib2_constr.append(f"(define-fun Table ((key (_ BitVec 6))) (_ BitVec 1)\n")
+    smtlib2_constr.append(f"    (ite (or\n")
+    smtlib2_constr.append(f"        (= key #b000000)\n")
+    smtlib2_constr.append(f"        (= key #b000101)\n")
+    smtlib2_constr.append(f"        (= key #b001010)\n")
+    smtlib2_constr.append(f"        (= key #b001111)\n")
+
+    smtlib2_constr.append(f"        (= key #b010001)\n")
+    smtlib2_constr.append(f"        (= key #b010100)\n")
+    smtlib2_constr.append(f"        (= key #b010101)\n")
+    smtlib2_constr.append(f"        (= key #b011011)\n")
+    smtlib2_constr.append(f"        (= key #b011111)\n")
+
+    smtlib2_constr.append(f"        (= key #b100010)\n")
+    smtlib2_constr.append(f"        (= key #b100111)\n")
+    smtlib2_constr.append(f"        (= key #b101000)\n")
+    smtlib2_constr.append(f"        (= key #b101010)\n")
+    smtlib2_constr.append(f"        (= key #b101111)\n")
+
+    smtlib2_constr.append(f"        (= key #b110011)\n")
+    smtlib2_constr.append(f"        (= key #b110111)\n")
+    smtlib2_constr.append(f"        (= key #b111011)\n")
+    smtlib2_constr.append(f"        (= key #b111111)\n")
+    smtlib2_constr.append(f"    ) #b1 #b0))\n")
+
     for r in range(rounds):
         if r > 0:
             for i in range(14):
@@ -38,75 +63,28 @@ def set_smtlib2(rounds):
             smtlib2_constr.append(f"(assert (= x_{i}_{r}_1 (ite (= x_{i}_{r}_0 #b00) #b00 #b11)))\n")
         smtlib2_constr.append("\n")
 
-        # XOR operation
-        def create_xor_assertion(result_var, input1_var, input2_var):
-            return (
-                f"(assert (= {result_var}\n"
-                f"    (ite (= {input1_var} #b00) {input2_var}\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b00)) #b01\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b01)) #b01\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b10)) #b11\n"
-                f"         (ite (and (= {input1_var} #b01) (= {input2_var} #b11)) #b11\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b00)) #b10\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b01)) #b11\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b10)) #b10\n"
-                f"         (ite (and (= {input1_var} #b10) (= {input2_var} #b11)) #b11\n"
-                f"         (ite (= {input1_var} #b11) #b11 #b00))))))))))))\n"
-            )
+        # XOR
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_1 x_7_{r}_0) z_7_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_5_{r}_1 x_8_{r}_0) z_8_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_4_{r}_1 x_9_{r}_0) z_9_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_3_{r}_1 x_10_{r}_0) z_10_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_2_{r}_1 x_11_{r}_0) z_11_{r}_0)) #b1))\n")
 
-        smtlib2_constr.append(create_xor_assertion(f"z_7_{r}_0", f"x_6_{r}_1", f"x_7_{r}_0"))
-        smtlib2_constr.append("\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_1_{r}_1 x_12_{r}_0) z_12_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_0_{r}_1 x_13_{r}_0) z_13_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_1_{r}_0 z_13_{r}_0) z_13_{r}_1)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_2_{r}_0 z_13_{r}_1) z_13_{r}_2)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_3_{r}_0 z_13_{r}_2) z_13_{r}_3)) #b1))\n")
 
-        smtlib2_constr.append(create_xor_assertion(f"z_8_{r}_0", f"x_5_{r}_1", f"x_8_{r}_0"))
-        smtlib2_constr.append("\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_4_{r}_0 z_13_{r}_3) z_13_{r}_4)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_5_{r}_0 z_13_{r}_4) z_13_{r}_5)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_0 z_13_{r}_5) z_13_{r}_6)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_0 z_12_{r}_0) z_12_{r}_1)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_0 z_11_{r}_0) z_11_{r}_1)) #b1))\n")
 
-        smtlib2_constr.append(create_xor_assertion(f"z_9_{r}_0", f"x_4_{r}_1", f"x_9_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_10_{r}_0", f"x_3_{r}_1", f"x_10_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_11_{r}_0", f"x_2_{r}_1", f"x_11_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_12_{r}_0", f"x_1_{r}_1", f"x_12_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_13_{r}_0", f"x_0_{r}_1", f"x_13_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_13_{r}_1", f"x_1_{r}_0", f"z_13_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_13_{r}_2", f"x_2_{r}_0", f"z_13_{r}_1"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_13_{r}_3", f"x_3_{r}_0", f"z_13_{r}_2"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_13_{r}_4", f"x_4_{r}_0", f"z_13_{r}_3"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_13_{r}_5", f"x_5_{r}_0", f"z_13_{r}_4"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_13_{r}_6", f"x_6_{r}_0", f"z_13_{r}_5"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_12_{r}_1", f"x_6_{r}_0", f"z_12_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_11_{r}_1", f"x_6_{r}_0", f"z_11_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_10_{r}_1", f"x_6_{r}_0", f"z_10_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_9_{r}_1", f"x_6_{r}_0", f"z_9_{r}_0"))
-        smtlib2_constr.append("\n")
-
-        smtlib2_constr.append(create_xor_assertion(f"z_8_{r}_1", f"x_6_{r}_0", f"z_8_{r}_0"))
-        smtlib2_constr.append("\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_0 z_10_{r}_0) z_10_{r}_1)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_0 z_9_{r}_0) z_9_{r}_1)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_0 z_8_{r}_0) z_8_{r}_1)) #b1))\n")
 
         # Permutation
         smtlib2_constr.append(f"(assert (= y_0_{r} z_7_{r}_0))\n")

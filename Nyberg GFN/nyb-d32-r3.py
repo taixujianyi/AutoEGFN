@@ -24,6 +24,31 @@ def set_smtlib2(rounds):
         
         smtlib2_constr.append("\n")
 
+    smtlib2_constr.append(f"(define-fun Table ((key (_ BitVec 6))) (_ BitVec 1)\n")
+    smtlib2_constr.append(f"    (ite (or\n")
+    smtlib2_constr.append(f"        (= key #b000000)\n")
+    smtlib2_constr.append(f"        (= key #b000101)\n")
+    smtlib2_constr.append(f"        (= key #b001010)\n")
+    smtlib2_constr.append(f"        (= key #b001111)\n")
+
+    smtlib2_constr.append(f"        (= key #b010001)\n")
+    smtlib2_constr.append(f"        (= key #b010100)\n")
+    smtlib2_constr.append(f"        (= key #b010101)\n")
+    smtlib2_constr.append(f"        (= key #b011011)\n")
+    smtlib2_constr.append(f"        (= key #b011111)\n")
+
+    smtlib2_constr.append(f"        (= key #b100010)\n")
+    smtlib2_constr.append(f"        (= key #b100111)\n")
+    smtlib2_constr.append(f"        (= key #b101000)\n")
+    smtlib2_constr.append(f"        (= key #b101010)\n")
+    smtlib2_constr.append(f"        (= key #b101111)\n")
+
+    smtlib2_constr.append(f"        (= key #b110011)\n")
+    smtlib2_constr.append(f"        (= key #b110111)\n")
+    smtlib2_constr.append(f"        (= key #b111011)\n")
+    smtlib2_constr.append(f"        (= key #b111111)\n")
+    smtlib2_constr.append(f"    ) #b1 #b0))\n")
+    
     for r in range(rounds):
         if r > 0:
             for i in range(32):
@@ -39,32 +64,19 @@ def set_smtlib2(rounds):
         # F function
         even_indices = [16, 18, 20, 22, 24, 26, 28, 30]
         odd_indices = [17, 19, 21, 23, 25, 27, 29, 31]
-        
         for i in even_indices + odd_indices:
             smtlib2_constr.append(f"(assert (= y_{i}_{r}_2 (ite (= y_{i}_{r}_1 #b00) #b00 #b11)))\n")
         smtlib2_constr.append("\n")
 
-        # XOR constraints (simplified pattern)
+
+        # XOR
         xor_pairs = [
             (16, 15), (17, 14), (18, 13), (19, 12), (20, 11), (21, 10), 
             (22, 9), (23, 8), (24, 7), (25, 6), (26, 5), (27, 4), 
             (28, 3), (29, 2), (30, 1), (31, 0)
         ]
-        
         for i, (y_idx, target_idx) in enumerate(xor_pairs):
-            smtlib2_constr.append(
-                f"(assert (= z_{i}_{r}_0\n"
-                f"    (ite (= y_{y_idx}_{r}_2 #b00) y_{target_idx}_{r}_1\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b01) (= y_{target_idx}_{r}_1 #b00)) #b01\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b01) (= y_{target_idx}_{r}_1 #b01)) #b01\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b01) (= y_{target_idx}_{r}_1 #b10)) #b11\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b01) (= y_{target_idx}_{r}_1 #b11)) #b11\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b10) (= y_{target_idx}_{r}_1 #b00)) #b10\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b10) (= y_{target_idx}_{r}_1 #b01)) #b11\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b10) (= y_{target_idx}_{r}_1 #b10)) #b10\n"
-                f"         (ite (and (= y_{y_idx}_{r}_2 #b10) (= y_{target_idx}_{r}_1 #b11)) #b11\n"
-                f"         (ite (= y_{y_idx}_{r}_2 #b11) #b11 #b00))))))))))))\n"
-            )
+            smtlib2_constr.append(f"(assert (= (Table (concat (concat y_{y_idx}_{r}_2 y_{target_idx}_{r}_1) z_{i}_{r}_0)) #b1))\n")
             smtlib2_constr.append("\n")
 
         # Permutation

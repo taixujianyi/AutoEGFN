@@ -47,6 +47,31 @@ def set_smtlib2(rounds):
         smtlib2_constr.append(f"(declare-fun y_10_{r} () (_ BitVec 2))\n")
         smtlib2_constr.append(f"(declare-fun y_11_{r} () (_ BitVec 2))\n\n")
 
+    smtlib2_constr.append(f"(define-fun Table ((key (_ BitVec 6))) (_ BitVec 1)\n")
+    smtlib2_constr.append(f"    (ite (or\n")
+    smtlib2_constr.append(f"        (= key #b000000)\n")
+    smtlib2_constr.append(f"        (= key #b000101)\n")
+    smtlib2_constr.append(f"        (= key #b001010)\n")
+    smtlib2_constr.append(f"        (= key #b001111)\n")
+
+    smtlib2_constr.append(f"        (= key #b010001)\n")
+    smtlib2_constr.append(f"        (= key #b010100)\n")
+    smtlib2_constr.append(f"        (= key #b010101)\n")
+    smtlib2_constr.append(f"        (= key #b011011)\n")
+    smtlib2_constr.append(f"        (= key #b011111)\n")
+
+    smtlib2_constr.append(f"        (= key #b100010)\n")
+    smtlib2_constr.append(f"        (= key #b100111)\n")
+    smtlib2_constr.append(f"        (= key #b101000)\n")
+    smtlib2_constr.append(f"        (= key #b101010)\n")
+    smtlib2_constr.append(f"        (= key #b101111)\n")
+
+    smtlib2_constr.append(f"        (= key #b110011)\n")
+    smtlib2_constr.append(f"        (= key #b110111)\n")
+    smtlib2_constr.append(f"        (= key #b111011)\n")
+    smtlib2_constr.append(f"        (= key #b111111)\n")
+    smtlib2_constr.append(f"    ) #b1 #b0))\n")
+    
     for r in range(rounds):
         # Assign
         if r > 0:
@@ -73,97 +98,15 @@ def set_smtlib2(rounds):
         smtlib2_constr.append(f"(assert (= x_7_{r}_1 (ite (= x_7_{r}_0 #b00) #b00 #b11)))\n")
         smtlib2_constr.append("\n")
 
-        # XOR operations
-        # z_0
-        smtlib2_constr.append(
-            f"(assert (= z_0_{r}_0\n"
-            f"    (ite (= x_6_{r}_1 #b00) x_5_{r}_0\n"
-            f"         (ite (and (= x_6_{r}_1 #b01) (= x_5_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= x_6_{r}_1 #b01) (= x_5_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= x_6_{r}_1 #b01) (= x_5_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= x_6_{r}_1 #b01) (= x_5_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= x_6_{r}_1 #b10) (= x_5_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= x_6_{r}_1 #b10) (= x_5_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= x_6_{r}_1 #b10) (= x_5_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= x_6_{r}_1 #b10) (= x_5_{r}_0 #b11)) #b11\n"
-            f"         (ite (= x_6_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        
-        # z_1
-        smtlib2_constr.append(
-            f"(assert (= z_1_{r}_0\n"
-            f"    (ite (= x_7_{r}_1 #b00) x_4_{r}_0\n"
-            f"         (ite (and (= x_7_{r}_1 #b01) (= x_4_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= x_7_{r}_1 #b01) (= x_4_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= x_7_{r}_1 #b01) (= x_4_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= x_7_{r}_1 #b01) (= x_4_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= x_7_{r}_1 #b10) (= x_4_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= x_7_{r}_1 #b10) (= x_4_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= x_7_{r}_1 #b10) (= x_4_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= x_7_{r}_1 #b10) (= x_4_{r}_0 #b11)) #b11\n"
-            f"         (ite (= x_7_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        
-        # z_2
-        smtlib2_constr.append(
-            f"(assert (= z_2_{r}_0\n"
-            f"    (ite (= x_8_{r}_1 #b00) x_3_{r}_0\n"
-            f"         (ite (and (= x_8_{r}_1 #b01) (= x_3_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= x_8_{r}_1 #b01) (= x_3_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= x_8_{r}_1 #b01) (= x_3_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= x_8_{r}_1 #b01) (= x_3_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= x_8_{r}_1 #b10) (= x_3_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= x_8_{r}_1 #b10) (= x_3_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= x_8_{r}_1 #b10) (= x_3_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= x_8_{r}_1 #b10) (= x_3_{r}_0 #b11)) #b11\n"
-            f"         (ite (= x_8_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        
-        # z_3
-        smtlib2_constr.append(
-            f"(assert (= z_3_{r}_0\n"
-            f"    (ite (= x_9_{r}_1 #b00) x_2_{r}_0\n"
-            f"         (ite (and (= x_9_{r}_1 #b01) (= x_2_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= x_9_{r}_1 #b01) (= x_2_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= x_9_{r}_1 #b01) (= x_2_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= x_9_{r}_1 #b01) (= x_2_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= x_9_{r}_1 #b10) (= x_2_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= x_9_{r}_1 #b10) (= x_2_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= x_9_{r}_1 #b10) (= x_2_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= x_9_{r}_1 #b10) (= x_2_{r}_0 #b11)) #b11\n"
-            f"         (ite (= x_9_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        
-        # z_4
-        smtlib2_constr.append(
-            f"(assert (= z_4_{r}_0\n"
-            f"    (ite (= x_10_{r}_1 #b00) x_1_{r}_0\n"
-            f"         (ite (and (= x_10_{r}_1 #b01) (= x_1_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= x_10_{r}_1 #b01) (= x_1_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= x_10_{r}_1 #b01) (= x_1_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= x_10_{r}_1 #b01) (= x_1_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= x_10_{r}_1 #b10) (= x_1_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= x_10_{r}_1 #b10) (= x_1_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= x_10_{r}_1 #b10) (= x_1_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= x_10_{r}_1 #b10) (= x_1_{r}_0 #b11)) #b11\n"
-            f"         (ite (= x_10_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        
-        # z_5
-        smtlib2_constr.append(
-            f"(assert (= z_5_{r}_0\n"
-            f"    (ite (= x_11_{r}_1 #b00) x_0_{r}_0\n"
-            f"         (ite (and (= x_11_{r}_1 #b01) (= x_0_{r}_0 #b00)) #b01\n"
-            f"         (ite (and (= x_11_{r}_1 #b01) (= x_0_{r}_0 #b01)) #b01\n"
-            f"         (ite (and (= x_11_{r}_1 #b01) (= x_0_{r}_0 #b10)) #b11\n"
-            f"         (ite (and (= x_11_{r}_1 #b01) (= x_0_{r}_0 #b11)) #b11\n"
-            f"         (ite (and (= x_11_{r}_1 #b10) (= x_0_{r}_0 #b00)) #b10\n"
-            f"         (ite (and (= x_11_{r}_1 #b10) (= x_0_{r}_0 #b01)) #b11\n"
-            f"         (ite (and (= x_11_{r}_1 #b10) (= x_0_{r}_0 #b10)) #b10\n"
-            f"         (ite (and (= x_11_{r}_1 #b10) (= x_0_{r}_0 #b11)) #b11\n"
-            f"         (ite (= x_11_{r}_1 #b11) #b11 #b00))))))))))))\n"
-        )
-        smtlib2_constr.append("\n")
+
+        # XOR
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_6_{r}_1 x_5_{r}_0) z_0_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_7_{r}_1 x_4_{r}_0) z_1_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_8_{r}_1 x_3_{r}_0) z_2_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_9_{r}_1 x_2_{r}_0) z_3_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_10_{r}_1 x_1_{r}_0) z_4_{r}_0)) #b1))\n")
+        smtlib2_constr.append(f"(assert (= (Table (concat (concat x_11_{r}_1 x_0_{r}_0) z_5_{r}_0)) #b1))\n")
+
 
         # Permutation
         smtlib2_constr.append(f"(assert (= y_0_{r} x_11_{r}_0))\n")
