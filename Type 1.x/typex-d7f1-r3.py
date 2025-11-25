@@ -35,24 +35,15 @@ def set_smtlib2(rounds):
     smtlib2_constr.append(f"    (ite (or\n")
     smtlib2_constr.append(f"        (= key #b000000)\n")
     smtlib2_constr.append(f"        (= key #b000101)\n")
-    smtlib2_constr.append(f"        (= key #b001010)\n")
     smtlib2_constr.append(f"        (= key #b001111)\n")
 
     smtlib2_constr.append(f"        (= key #b010001)\n")
     smtlib2_constr.append(f"        (= key #b010100)\n")
     smtlib2_constr.append(f"        (= key #b010101)\n")
-    smtlib2_constr.append(f"        (= key #b011011)\n")
     smtlib2_constr.append(f"        (= key #b011111)\n")
-
-    smtlib2_constr.append(f"        (= key #b100010)\n")
-    smtlib2_constr.append(f"        (= key #b100111)\n")
-    smtlib2_constr.append(f"        (= key #b101000)\n")
-    smtlib2_constr.append(f"        (= key #b101010)\n")
-    smtlib2_constr.append(f"        (= key #b101111)\n")
 
     smtlib2_constr.append(f"        (= key #b110011)\n")
     smtlib2_constr.append(f"        (= key #b110111)\n")
-    smtlib2_constr.append(f"        (= key #b111011)\n")
     smtlib2_constr.append(f"        (= key #b111111)\n")
     smtlib2_constr.append(f"    ) #b1 #b0))\n")
 
@@ -104,13 +95,10 @@ def set_smtlib2(rounds):
 
     # Constraints
     smtlib2_constr.append("(assert (not (= (concat y_0_0_0 (concat y_1_0_0 (concat y_2_0_0 (concat y_3_0_0 (concat y_4_0_0 (concat y_5_0_0 y_6_0_0)))))) #b00000000000000)))\n")
-    smtlib2_constr.append("(assert (not (= y_0_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= y_1_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= y_2_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= y_3_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= y_4_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= y_5_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= y_6_0_0 #b11)))\n\n")
+    for i in range(7):
+        smtlib2_constr.append(f"(assert (not (= y_{i}_0_0 #b11)))\n")
+        smtlib2_constr.append(f"(assert (not (= y_{i}_0_0 #b10)))\n")
+    smtlib2_constr.append("\n")
 
     smtlib2_constr.append("(check-sat)\n(get-model)\n")
     return smtlib2_constr

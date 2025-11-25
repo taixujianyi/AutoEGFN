@@ -28,24 +28,15 @@ def set_smtlib2(rounds):
     smtlib2_constr.append(f"    (ite (or\n")
     smtlib2_constr.append(f"        (= key #b000000)\n")
     smtlib2_constr.append(f"        (= key #b000101)\n")
-    smtlib2_constr.append(f"        (= key #b001010)\n")
     smtlib2_constr.append(f"        (= key #b001111)\n")
 
     smtlib2_constr.append(f"        (= key #b010001)\n")
     smtlib2_constr.append(f"        (= key #b010100)\n")
     smtlib2_constr.append(f"        (= key #b010101)\n")
-    smtlib2_constr.append(f"        (= key #b011011)\n")
     smtlib2_constr.append(f"        (= key #b011111)\n")
-
-    smtlib2_constr.append(f"        (= key #b100010)\n")
-    smtlib2_constr.append(f"        (= key #b100111)\n")
-    smtlib2_constr.append(f"        (= key #b101000)\n")
-    smtlib2_constr.append(f"        (= key #b101010)\n")
-    smtlib2_constr.append(f"        (= key #b101111)\n")
 
     smtlib2_constr.append(f"        (= key #b110011)\n")
     smtlib2_constr.append(f"        (= key #b110111)\n")
-    smtlib2_constr.append(f"        (= key #b111011)\n")
     smtlib2_constr.append(f"        (= key #b111111)\n")
     smtlib2_constr.append(f"    ) #b1 #b0))\n")
     
@@ -98,6 +89,7 @@ def set_smtlib2(rounds):
     # Constraints
     for i in range(8):
         smtlib2_constr.append(f"(assert (not (= y_{i}_0_0 #b11)))\n")
+        smtlib2_constr.append(f"(assert (not (= y_{i}_0_0 #b10)))\n")
     smtlib2_constr.append("\n")
 
     smtlib2_constr.append("(check-sat)\n(get-model)\n")

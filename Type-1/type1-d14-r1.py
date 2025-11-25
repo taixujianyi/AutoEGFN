@@ -42,24 +42,15 @@ def set_smtlib2_stp(rounds):
     smtlib2_constr.append(f"    (ite (or\n")
     smtlib2_constr.append(f"        (= key #b000000)\n")
     smtlib2_constr.append(f"        (= key #b000101)\n")
-    smtlib2_constr.append(f"        (= key #b001010)\n")
     smtlib2_constr.append(f"        (= key #b001111)\n")
 
     smtlib2_constr.append(f"        (= key #b010001)\n")
     smtlib2_constr.append(f"        (= key #b010100)\n")
     smtlib2_constr.append(f"        (= key #b010101)\n")
-    smtlib2_constr.append(f"        (= key #b011011)\n")
     smtlib2_constr.append(f"        (= key #b011111)\n")
-
-    smtlib2_constr.append(f"        (= key #b100010)\n")
-    smtlib2_constr.append(f"        (= key #b100111)\n")
-    smtlib2_constr.append(f"        (= key #b101000)\n")
-    smtlib2_constr.append(f"        (= key #b101010)\n")
-    smtlib2_constr.append(f"        (= key #b101111)\n")
 
     smtlib2_constr.append(f"        (= key #b110011)\n")
     smtlib2_constr.append(f"        (= key #b110111)\n")
-    smtlib2_constr.append(f"        (= key #b111011)\n")
     smtlib2_constr.append(f"        (= key #b111111)\n")
     smtlib2_constr.append(f"    ) #b1 #b0))\n")
     
@@ -113,20 +104,10 @@ def set_smtlib2_stp(rounds):
     smtlib2_constr.append(
         "(assert (not (= (concat (concat (concat (concat (concat (concat (concat x_0_0_0 x_1_0_0) (concat x_2_0_0 x_3_0_0)) (concat x_4_0_0 x_5_0_0)) (concat x_6_0_0 x_7_0_0)) (concat x_8_0_0 x_9_0_0)) (concat x_10_0_0 x_11_0_0)) (concat x_12_0_0 x_13_0_0)) #b0000000000000000000000000000)))\n"
     )
-    smtlib2_constr.append("(assert (not (= x_0_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_1_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_2_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_3_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_4_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_5_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_6_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_7_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_8_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_9_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_10_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_11_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_12_0_0 #b11)))\n")
-    smtlib2_constr.append("(assert (not (= x_13_0_0 #b11)))\n\n")
+    for i in range(14):
+        smtlib2_constr.append(f"(assert (not (= x_{i}_0_0 #b11)))\n")
+        smtlib2_constr.append(f"(assert (not (= x_{i}_0_0 #b10)))\n")
+    smtlib2_constr.append("\n")
 
     smtlib2_constr.append("(check-sat)\n(get-model)\n")
     return smtlib2_constr
