@@ -2,6 +2,8 @@
 
 # AutoEGFN
 
+This repository contains the proof and implementation artefacts associated with the paper "Computer-Aided Proof for Extended Generalized Feistel Networks", which will appear at FSE 2026.
+
 We provide a computer-aided proof tool called AutoEGFN to determine the number of rounds sufficient for PRP and SPRP security for various variants of EGFN. This tool is constructed by calculating three parameters: $r_1$, $r_2$, and $r_3$.
 To show the effectiveness of AutoEGFN, we have applied it to multiple structures such as Type-1/2, Type 1.x, SH/TH GFN, SM10's GFN, Nyberg's GFN, and BMT's EGFN.
 
